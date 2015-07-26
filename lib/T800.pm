@@ -76,6 +76,7 @@ sub on_poco_irc_001 {
 
     foreach my $channel ( @{ $self->config->{'channels'} } ) {
 	$self->irc->yield( join => $channel );
+	print "Joining channel: $channel\n";
     }
 }
 

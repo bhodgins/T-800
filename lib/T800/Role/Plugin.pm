@@ -3,9 +3,10 @@ package T800::Role::Plugin;
 use Moose::Role;
 
 
-has 'name' => (
-    isa    => 'Str',
-    is     => 'rw',
+has 'name'   => (
+    isa      => 'Str',
+    is       => 'rw',
+    default  => '',
     );
 
 has 'core'   => (
