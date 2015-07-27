@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+use lib 'lib';
+use T800;
+
+T800->new->run;
+exit;
+
