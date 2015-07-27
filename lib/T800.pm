@@ -81,13 +81,32 @@ sub on_poco_irc_001 {
 }
 
 sub on_poco_irc_public {
-    my ($self, $event) = @_;
+    my $self = shift;
+    my ($who, $where, $what) = @_;
 
-    print "irc_public\n";
-    
-    $self->plugin_dispatch(
-	'PublicReceiver' => 'on_irc_public',
-	@{ $event->args }[0, 1, 2]);
+    my @attention = (
+	$self->config->trigger,
+	$self->config->nick . ': ',
+	$self->config->nick . ', ',
+	$self->config->nick . ' ',
+	);
+
+    # Plugin based command dispatch:
+    if ( grep { $what =~ /^$_/ } @attention) {
+	
+	my ($plugin, $message) = split ' ', $what, 2;
+	$plugin = substr($plugin, 1) if $plugin =~ /^\!/;
+	
+	# TODO: fix this to work or find a better way:
+	if ( my $pluginref = $self->plugin_named($plugin) ) {
+	    $self->plugin_dispatch(
+		role   => 'PluginCommand',
+		event  => '_command',
+		target => $plugin,
+		data   => $message,
+		);
+	}
+    }
 }
 
 sub on_poco__default {
