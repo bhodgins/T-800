@@ -81,29 +81,46 @@ sub on_poco_irc_001 {
 }
 
 sub on_poco_irc_public {
-    my $self = shift;
-    my ($who, $where, $what) = @_;
+    my ($self, $event) = @_;
+    my ($who, $where, $what) = @{$event->args}[0 .. 2];
+
+    $self->plugin_dispatch(
+	role    => 'PrivmsgReceiver',
+	call    => 'on_privmsg',
+	args    => [$what],
+	);
 
     my @attention = (
-	$self->config->trigger,
 	$self->config->nick . ': ',
 	$self->config->nick . ', ',
 	$self->config->nick . ' ',
 	);
 
     # Plugin based command dispatch:
-    if ( grep { $what =~ /^$_/ } @attention) {
-	
-	my ($plugin, $message) = split ' ', $what, 2;
-	$plugin = substr($plugin, 1) if $plugin =~ /^\!/;
+    my $trigger = $self->config->trigger;
+    my $direct;
+    if ( ($direct = grep { $what =~ /^$_/ } @attention)
+	 or ($what =~ /^$trigger/ and $trigger)) {
+
+	my ($plugin, $message);
+	my ($first, $rest) = split ' ', $what, 2;
+
+	if ($first   =~ /^$trigger/ ) {
+	    $plugin  =  substr($first, 1);
+	    $message =  $rest;
+	}
+
+	elsif ($direct) {
+	    ($plugin, $message) = split ' ', $rest, 2;
+	}
 	
 	# TODO: fix this to work or find a better way:
-	if ( my $pluginref = $self->plugin_named($plugin) ) {
+	if ( $self->plugin_named($plugin) ) {
 	    $self->plugin_dispatch(
-		role   => 'PluginCommand',
-		event  => '_command',
-		target => $plugin,
-		data   => $message,
+		role    => 'PluginCommands',
+		call    => 'on_command',
+		plugins => [$plugin],
+		args    => [$who, $where, $message],
 		);
 	}
     }

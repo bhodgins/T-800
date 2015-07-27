@@ -1,23 +1,32 @@
 package T800::Plugin::PolicyKit;
 
 use Moose;
-use MooseX::Params::Validate qw(pos_validated_list);
+use MooseX::Params::Validate qw(validated_list);
 
 use YAML::Tiny;
 use Getopt::Long qw(GetOptionsFromString);
 
 with 'T800::Role::Plugin';
 with 'T800::Role::Initialization';
-with 'T800::Role::PublicReceiver';
+with 'T800::Role::PluginCommands';
 
 with 'Universa::Role::Configuration' => {
     class      => 'T800::Plugin::PolicyKit::Config',
     configfile => 'policykit.yml',
 };
 
+sub BUILD {}
+with 'T800::Role::IRCHandler';
+
 my @arguables = (
     'x',
     );
+
+sub _cmd_test {
+    my $self = shift;
+
+    print "HELLO!\n";
+}
 
 sub t800_preinit {
     my $self = shift;
@@ -47,6 +56,19 @@ sub on_irc_public {
     }
 }
 
+sub t800_init {
+    my $self = shift;
+
+    $self->add_command('test' => '_cmd_test');
+    $self->add_command('_default' => '_cmd_default');
+}
+
+sub _cmd_default {
+    my $self = shift;
+
+    #$self->irc->yield( privmsg => $channel => "PolicyKit is not current unavailable\n");
+}
+
 sub t800_postinit {
     my $self = shift;
 
@@ -59,23 +81,21 @@ sub t800_postinit {
     $self->core->meta->remove_method('plugin_dispatch');
 
     $self->core->meta->add_method('plugin_dispatch' => sub {
-	my ($self, $role, $call, @args) = pos_validated_list(
+	my ($self, $role, $call, $plugin, $args) = validated_list(
 	    \@_,
-	    { does => 'T800' },
-	    { isa  => 'Str' },
-	    { isa  => 'Str' },
-	    MX_PARAMS_VALIDATE_ALLOW_EXTRA => 1,
+	    role    => { isa => 'Str' },
+	    call    => { isa => 'Str' },
+	    plugins => { isa => 'ArrayRef[Str]|Undef', optional => 1 },
+	    args    => { isa => 'ArrayRef[Any]',       optional => 1 },
 	    );
 
 	# Event policy matches check to ensure acces to events:
-	if ($filtered_events{$role} eq $call) {
-	    return unless $policykit->event_policy_match(\@args);
-	}
+	return unless $policykit->event_policy_match($role, $call, $args);
 
 	foreach my $plugin ($self->plugins_with($role)) {
 	    # Plugin policy matches check to ensure access to plugins:
-	    if ($policykit->plugin_policy_match(ref($plugin), \@args)) {
-		$plugin->$call(@args) if $plugin->can($call);
+	    if ($policykit->plugin_policy_match(ref($plugin), $role, $call, $args)) {
+		$plugin->$call(@{ $args }) if $plugin->can($call);
 	    }
 	}
 				  });

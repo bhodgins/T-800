@@ -13,6 +13,7 @@ has 'port'     => (isa => 'Int',       is => 'ro', default => 6667);
 
 has 'channels' => (isa => 'ArrayRef[Str]', is => 'ro', required => 1);
 has 'plugins'  => (isa => 'ArrayRef[Str]|Undef', is => 'ro');
+has 'trigger'  => (isa => 'Str', is => 'ro', default => '');
 
 __PACKAGE__->meta->make_immutable;
 
@@ -21,6 +22,9 @@ __DATA__
 # configuration file for T-800
 nick: T-800
 host: irc.freenode.net
+
+# If you would like to use a trigger for your bot, uncomment and specify it here:
+# trigger: "!"
 
 channels:
   - "##9600-baud.net"
