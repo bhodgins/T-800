@@ -3,9 +3,11 @@
 use warnings;
 use strict;
 
-use lib 'lib';
+use FindBin qw($Bin);
+use lib "$Bin/lib";
 use T800;
+
+mkdir "$Bin/etc" unless -d "$Bin/etc";
 
 T800->new->run;
 exit;
-

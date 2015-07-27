@@ -4,11 +4,12 @@ package T800;
 use Moose;
 use T800::Config;
 use Moose::Autobox;
+use FindBin qw($Bin);
 
 use Module::Runtime qw(require_module);
 
 with 'Universa::Role::Configuration' => {
-    confdir    => '.',
+    confdir    => "$Bin/etc",
     configfile => 't-800.yml',
     class      => 'T800::Config',
 };
@@ -25,10 +26,10 @@ use Reflex::Trait::Watched qw(watches);
 
 use POE qw(Component::IRC);
 
-has 'irc'   => (
-    isa     => 'Object|Undef',
-    is      => 'rw',
-    builder => '_build_irc_component',
+has 'irc'    => (
+    isa      => 'Object|Undef',
+    is       => 'rw',
+    builder  => '_build_irc_component',
     );
 
 watches 'poco_watcher' => (
