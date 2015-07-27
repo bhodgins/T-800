@@ -4,14 +4,20 @@ use Moose;
 use MooseX::Params::Validate qw(pos_validated_list);
 
 use YAML::Tiny;
+use Getopt::Long qw(GetOptionsFromString);
 
 with 'T800::Role::Plugin';
 with 'T800::Role::Initialization';
+with 'T800::Role::PublicReceiver';
 
 with 'Universa::Role::Configuration' => {
     class      => 'T800::Plugin::PolicyKit::Config',
     configfile => 'policykit.yml',
 };
+
+my @arguables = (
+    'x',
+    );
 
 sub t800_preinit {
     my $self = shift;
@@ -23,6 +29,23 @@ my %filtered_events = (
     'PublicReceiver' => 'on_irc_public',
     # TODO
 );
+
+sub on_irc_public {
+    my $self = shift;
+    my ($who, $where, $what) = @_;
+
+    my $nick = (split '!', $who)[0];
+    my $channel = $where->[0];
+
+    # TODO: Plugin oriented commands:
+    if ($what =~ /^\!policykit (.*)/) {
+	print "COMMAND\n";
+	my ($ret, $opts) = GetOptionsFromString($1, @arguables);
+	use Data::Dumper;
+	print Dumper $opts;
+	print Dumper $ret;
+    }
+}
 
 sub t800_postinit {
     my $self = shift;
