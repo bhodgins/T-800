@@ -4,7 +4,13 @@ use Moose;
 
 with 'T800::Role::Plugin';
 with 'T800::Role::MessageReceiver';
+with 'T800::Role::Initialization';
 
+sub t800_init {
+    my $self = shift;
+
+    $self->name('commotion');
+}
 
 sub on_privmsg {
     my ($self, $who, $where, $what) = @_;
