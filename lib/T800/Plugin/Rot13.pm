@@ -8,8 +8,6 @@ with 'T800::Role::IRCHandler';
 with 'T800::Role::Initialization';
 
 
-sub BUILD {}
-
 sub t800_init {
     my $self = shift;
 

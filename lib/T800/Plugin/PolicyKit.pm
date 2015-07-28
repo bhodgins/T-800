@@ -38,13 +38,6 @@ my %filtered_events = (
     # TODO
 );
 
-sub t800_init {
-    my $self = shift;
-
-    $self->add_command('test' => '_cmd_test');
-    $self->add_command('_default' => '_cmd_default');
-}
-
 sub t800_postinit {
     my $self = shift;
 
