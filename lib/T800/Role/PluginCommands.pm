@@ -13,31 +13,43 @@ has '_commands' => (
 
 
 sub add_command {
+    my $self = shift;
+
+    # Allow multiple commands to be registered once if an array reference
+    # has been provided:
+    if (ref($_[0]) eq 'ARRAY') {
+
+	foreach my $register (@{ $_[0] }) {
+	    return $self->_add_command(@{ $register->[0, 1] });
+	}
+    }
+
+    # Otherwise we just register a single command:
+    $self->_add_command(@_);
+}
+
+sub _add_command {
     my ($self, $command, $callback) = pos_validated_list(
 	\@_,
 	{ does => 'T800::Role::PluginCommands' },
 	{ isa  => 'Str'                        },
 	{ isa  => 'Str'                        }
 	);
-
-    return carp 'Cannott call add_command without a valid callback name'
+    
+    return carp 'Cannot call add_command without a valid callback name'
 	unless $self->can($callback);
-
+    
     $self->_commands->{$command} = $callback
 }
 
 sub on_command {
     my ($self, $who, $where, $what) = @_;;
 
-    use Data::Dumper;
-    print Dumper @_[1 .. $#_];
-
     return unless $what;
     my ($command, $rest) = split ' ', $what, 2;
     if ( exists($self->_commands->{$command}) ) {
 	my $cb = $self->_commands->{$command};
 
-	print "FOO: $cb\n";
 	$self->$cb($who, $where, $rest) if $self->can($cb);
     }
 

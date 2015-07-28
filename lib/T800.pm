@@ -84,10 +84,11 @@ sub on_poco_irc_public {
     my ($self, $event) = @_;
     my ($who, $where, $what) = @{$event->args}[0 .. 2];
 
+    # Some plugins want to see everything:
     $self->plugin_dispatch(
-	role    => 'PrivmsgReceiver',
+	role    => 'MessageReceiver',
 	call    => 'on_privmsg',
-	args    => [$what],
+	args    => [$who, $where, $what],
 	);
 
     my @attention = (

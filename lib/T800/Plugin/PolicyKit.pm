@@ -25,7 +25,6 @@ my @arguables = (
 sub _cmd_test {
     my $self = shift;
 
-    print "HELLO!\n";
 }
 
 sub t800_preinit {
@@ -39,34 +38,11 @@ my %filtered_events = (
     # TODO
 );
 
-sub on_irc_public {
-    my $self = shift;
-    my ($who, $where, $what) = @_;
-
-    my $nick = (split '!', $who)[0];
-    my $channel = $where->[0];
-
-    # TODO: Plugin oriented commands:
-    if ($what =~ /^\!policykit (.*)/) {
-	print "COMMAND\n";
-	my ($ret, $opts) = GetOptionsFromString($1, @arguables);
-	use Data::Dumper;
-	print Dumper $opts;
-	print Dumper $ret;
-    }
-}
-
 sub t800_init {
     my $self = shift;
 
     $self->add_command('test' => '_cmd_test');
     $self->add_command('_default' => '_cmd_default');
-}
-
-sub _cmd_default {
-    my $self = shift;
-
-    #$self->irc->yield( privmsg => $channel => "PolicyKit is not current unavailable\n");
 }
 
 sub t800_postinit {

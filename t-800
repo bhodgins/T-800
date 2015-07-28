@@ -6,7 +6,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/lib";
 use T800;
-use Devel::Confess;
+#use Devel::Confess;
 
 mkdir "$Bin/etc" unless -d "$Bin/etc";
 
