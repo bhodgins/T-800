@@ -11,35 +11,15 @@ has '_commands' => (
     builder     => '_build_commands',
     );
 
-
 sub add_command {
-    my $self = shift;
-
-    # Allow multiple commands to be registered once if an array reference
-    # has been provided:
-    if (ref($_[0]) eq 'ARRAY') {
-
-	foreach my $register (@{ $_[0] }) {
-	    return $self->_add_command(@{ $register->[0, 1] });
-	}
+    my ($self, %params) = @_;
+    
+    while ( my ($command, $callback) = each %params ) {
+	return carp 'Cannot call add_command without a valid callback name'
+	    unless $self->can($callback);
+	
+	$self->_commands->{$command} = $callback
     }
-
-    # Otherwise we just register a single command:
-    $self->_add_command(@_);
-}
-
-sub _add_command {
-    my ($self, $command, $callback) = pos_validated_list(
-	\@_,
-	{ does => 'T800::Role::PluginCommands' },
-	{ isa  => 'Str'                        },
-	{ isa  => 'Str'                        }
-	);
-    
-    return carp 'Cannot call add_command without a valid callback name'
-	unless $self->can($callback);
-    
-    $self->_commands->{$command} = $callback
 }
 
 sub on_command {
