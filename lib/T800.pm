@@ -4,6 +4,7 @@ package T800;
 use Moose;
 use T800::Config;
 use Moose::Autobox;
+use MooseX::Params::Validate qw(validated_list);
 use FindBin qw($Bin);
 
 use Module::Runtime qw(require_module);
@@ -170,6 +171,22 @@ sub _build_plugins {
     \@autoloaded;
 }
 
+# Overload to add hash like params:
+sub plugin_dispatch {
+    my ($self, $role, $call, $plugin, $args) = validated_list(
+	\@_,
+	role    => { isa => 'Str' },
+	call    => { isa => 'Str' },
+	plugins => { isa => 'ArrayRef[Str]|Undef', optional => 1 },
+	args    => { isa => 'ArrayRef[Any]',       optional => 1 },
+	);
+    
+    
+    foreach my $plugin ($self->plugins_with($role)) {
+	$plugin->$call(@{ $args }) if $plugin->can($call);
+    }
+}
+
 sub run {
     my $self = shift;
 
@@ -181,7 +198,11 @@ sub run {
         t800_postinit
     );
 
-    $self->plugin_dispatch( 'Initialization' => $_ ) foreach (@init_levels);
+    $self->plugin_dispatch(
+	role => 'Initialization',
+	call => $_,
+	) foreach (@init_levels);
+
     $self->run_all;
 }
 
