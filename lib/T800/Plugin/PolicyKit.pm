@@ -50,7 +50,7 @@ sub t800_postinit {
     $self->core->meta->remove_method('plugin_dispatch');
 
     $self->core->meta->add_method('plugin_dispatch' => sub {
-	my ($self, $role, $call, $plugin, $args) = validated_list(
+	my ($self, $role, $call, $plugins, $args) = validated_list(
 	    \@_,
 	    role    => { isa => 'Str' },
 	    call    => { isa => 'Str' },
@@ -60,11 +60,24 @@ sub t800_postinit {
 
 	# Event policy matches check to ensure acces to events:
 	return unless $policykit->event_policy_match($role, $call, $args);
+	
+	if ($plugins and @{ $plugins }) {
+	    foreach my $plugin (@{ $plugins}) {
+		$plugin = $self->plugin_named($plugin)
+		    or return warn "No such plugin";
 
-	foreach my $plugin ($self->plugins_with($role)) {
-	    # Plugin policy matches check to ensure access to plugins:
-	    if ($policykit->plugin_policy_match(ref($plugin), $role, $call, $args)) {
-		$plugin->$call(@{ $args }) if $plugin->can($call);
+		if ($policykit->plugin_policy_match(ref($plugin), $role, $call, $args)) {
+		    $plugin->$call(@{ $args }) if $plugin->can($call);
+		}
+	    }
+	}
+	
+	else {	    
+	    foreach my $plugin ($self->plugins_with($role)) {
+		# Plugin policy matches check to ensure access to plugins:
+		if ($policykit->plugin_policy_match(ref($plugin), $role, $call, $args)) {
+		    $plugin->$call(@{ $args }) if $plugin->can($call);
+		}
 	    }
 	}
 				  });

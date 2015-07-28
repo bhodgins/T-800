@@ -173,7 +173,7 @@ sub _build_plugins {
 
 # Overload to add hash like params:
 sub plugin_dispatch {
-    my ($self, $role, $call, $plugin, $args) = validated_list(
+    my ($self, $role, $call, $plugins, $args) = validated_list(
 	\@_,
 	role    => { isa => 'Str' },
 	call    => { isa => 'Str' },
@@ -181,9 +181,19 @@ sub plugin_dispatch {
 	args    => { isa => 'ArrayRef[Any]',       optional => 1 },
 	);
     
-    
-    foreach my $plugin ($self->plugins_with($role)) {
-	$plugin->$call(@{ $args }) if $plugin->can($call);
+    if ($plugins and @{ $plugins }) {
+	foreach my $plugin (@{ $plugins}) {
+	    $plugin = $self->plugin_named($plugin)
+		or return warn "No such plugin";
+	    
+	    $plugin->$call(@{ $args }) if $plugin->can($call);
+	}
+    }
+
+    else {
+	foreach my $plugin ($self->plugins_with($role)) {
+	    $plugin->$call(@{ $args }) if $plugin->can($call);
+	}
     }
 }
 
