@@ -6,6 +6,7 @@ use LWP;
 with 'T800::Role::Plugin';
 with 'T800::Role::MessageReceiver';
 with 'T800::Role::Initialization';
+with 'T800::Role::IRCHandler';
 
 sub t800_init {
 	my $self = shift;
@@ -26,7 +27,7 @@ sub on_privmsg {
 			$ua->env_proxy;
 
 			my $response = $ua->get($_);
-			if (response->is_success) {
+			if ($response->is_success) {
 				$title = $response->title();
 			} else {
 				$title = $response->status_line;

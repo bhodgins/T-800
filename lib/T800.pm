@@ -48,6 +48,7 @@ sub _build_irc_component {
 	Password => $self->config->password,
 	UseSSL   => $self->config->ssl,
 	Port     => $self->config->port,
+	Debug    => 1,
 	);
 }
 
@@ -67,6 +68,18 @@ sub BUILD {
 	    $self->irc->yield( connect  => {}    );
 	    print "connecting...\n";
 	}
+	);
+}
+
+sub on_poco_irc_353 {
+    my ($self, $event) = @_;
+    my $channel = $event->args->[2]->[1];
+    my @names   = split ' ', $event->args->[2]->[2];
+
+    $self->plugin_dispatch(
+	role => 'SpecialMessages',
+	call => 'on_353',
+	args => [$channel, \@names],,
 	);
 }
 
@@ -128,7 +141,7 @@ sub on_poco_irc_public {
     }
 }
 
-sub on_poco__default {
+sub on_poco_irc_raw {
     my ($self, $event) = @_;
 
     use Data::Dumper;
