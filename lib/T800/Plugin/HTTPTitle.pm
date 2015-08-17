@@ -2,6 +2,7 @@ package T800::Plugin::HTTPTitle;
 
 use Moose;
 use LWP;
+use Data::Validate::URI qw(is_web_uri);
 
 with 'T800::Role::Plugin';
 with 'T800::Role::MessageReceiver';
@@ -19,9 +20,11 @@ sub on_privmsg {
 	my ($nick, $channel) = ((split '!', $who)[0],$where->[0]);
 
 	my @message = (split / /, $what);
+	my $urlcount = 0;
 	foreach (@message) {
-		if ($_ =~ /^http/) {
-			my $title = '';
+		if (is_web_uri($_)) {   #if ($_ =~ /^https?\:\/\/.+?\..+?/) {
+                        $urlcount++;
+			my $title = "";
 			my $ua = LWP::UserAgent->new;
 			$ua->timeout(10);
 			$ua->env_proxy;
@@ -29,6 +32,8 @@ sub on_privmsg {
 			my $response = $ua->get($_);
 			if ($response->is_success) {
 				$title = $response->title();
+			        next unless defined $title;
+				next if $title eq '';
 			} else {
 				$title = $response->status_line;
 			}
@@ -40,10 +45,9 @@ sub on_privmsg {
 					"$_"
 				);
 				$temp++;
-				if ($temp == 3) {
-					last;
-				}
+				last if $temp == 3; 
 			}
+			last if $urlcount > 4;
 		}
 	}
 }
