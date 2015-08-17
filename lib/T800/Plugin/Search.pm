@@ -19,7 +19,7 @@ sub on_privmsg {
 	
 	my $channel = $where->[0];    
 	my $zci = WWW::DuckDuckGo->new->zci($params);
-	my $results = $zci->default_related_topics;
+	my $results = $zci->results;
 	
 	print $params . "\n";
 	use Data::Dumper;
