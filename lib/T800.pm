@@ -94,6 +94,11 @@ sub on_poco_irc_001 {
     }
 }
 
+sub on_poco_irc_msg {
+    $_[1]->args->[1]->[0] = (split '!', $_[1]->args->[0])[0];
+    $_[0]->on_poco_irc_public($_[1]);
+}
+
 sub on_poco_irc_public {
     my ($self, $event) = @_;
     my ($who, $where, $what) = @{$event->args}[0 .. 2];
