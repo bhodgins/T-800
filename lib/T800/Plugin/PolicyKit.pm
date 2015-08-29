@@ -15,7 +15,6 @@ with 'Universa::Role::Configuration' => {
     configfile => 'policykit.yml',
 };
 
-sub BUILD {}
 with 'T800::Role::IRCHandler';
 
 my @arguables = (
@@ -27,7 +26,7 @@ sub _cmd_test {
 
 }
 
-sub t800_preinit {
+sub BUILD {
     my $self = shift;
 
     $self->name('policykit');

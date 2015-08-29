@@ -6,7 +6,7 @@ with 'T800::Role::Plugin';
 with 'T800::Role::MessageReceiver';
 with 'T800::Role::Initialization';
 
-sub t800_init {
+sub BUILD {
     my $self = shift;
 
     $self->name('commotion');

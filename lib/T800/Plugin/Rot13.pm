@@ -8,7 +8,7 @@ with 'T800::Role::IRCHandler';
 with 'T800::Role::Initialization';
 
 
-sub t800_init {
+sub BUILD {
     my $self = shift;
 
     $self->name('rot13');
