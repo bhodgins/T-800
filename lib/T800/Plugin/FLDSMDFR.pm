@@ -23,7 +23,7 @@ has 'names_cache' => (
     );
 
 
-sub t800_init {
+sub BUILD {
     my $self = shift;
 
     $self->name('serve');

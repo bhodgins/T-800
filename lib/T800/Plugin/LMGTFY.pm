@@ -27,3 +27,4 @@ sub on_privmsg {
 }
 
 __PACKAGE__->meta->make_immutable;
+

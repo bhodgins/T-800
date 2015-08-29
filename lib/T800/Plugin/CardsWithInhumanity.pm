@@ -21,7 +21,7 @@ has 'cards' => (
     );
 
 
-sub t800_init {
+sub BUILD {
     my $self = shift;
 
     $self->name('inhumanity');
